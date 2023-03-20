@@ -47,10 +47,23 @@ DMA_HandleTypeDef hdma_tim2_ch1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-uint32_t MotorSetDuty = 50;
-
 uint32_t InputCaptureBuffer[IC_BUFFER_SIZE];
 float MotorRPM = 0;
+float K = 3.5;
+float Kp = 5;
+float c = -10;
+float error = 0;
+
+// User Parameters ====================================================
+uint8_t MotorControlEnable = 0;
+
+// If MotorControlEnable = 0
+uint32_t MotorSetDuty = 50;
+
+// If MotorControlEnable = 1
+float MotorSetRPM = 20;
+// ====================================================================
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -120,9 +133,22 @@ int main(void)
 	  if (HAL_GetTick() >= timestamp)
 	  {
 		  timestamp = HAL_GetTick() + 500;
-
-		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, MotorSetDuty);
 		  MotorRPM = 1000000.0 * 60 / (IC_Period_Calculate()*768.0);
+
+		  if (MotorControlEnable == 0)
+		  {
+			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, MotorSetDuty);
+		  }
+		  else if (MotorControlEnable == 1)
+		  {
+			  if (MotorSetRPM > 22)
+			  {
+				  MotorSetRPM = 22;
+			  }
+
+			  error = MotorSetRPM - MotorRPM;
+			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, K*MotorRPM + c + Kp*error);
+		  }
 	  }
   }
   /* USER CODE END 3 */
