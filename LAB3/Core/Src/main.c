@@ -49,10 +49,11 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 uint32_t InputCaptureBuffer[IC_BUFFER_SIZE];
 float MotorRPM = 0;
+float error = 0;
+
 float K = 3.5;
 float Kp = 5;
 float c = -10;
-float error = 0;
 
 // User Parameters ====================================================
 uint8_t MotorControlEnable = 0;
